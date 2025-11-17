@@ -13,6 +13,7 @@ res = build_tree_and_contents(
         ".cache",
         ".gitignore",
         ".pytest_cache",
+        # "*old"
     ],
     content_exclude=[
         "__pycache__",
@@ -25,6 +26,7 @@ res = build_tree_and_contents(
         ".cache",
         ".gitignore",
         ".pytest_cache",
+        # "*old"
     ],
     content_include=[".py", ".toml"],
     content_ignore_file_type_error=False,
