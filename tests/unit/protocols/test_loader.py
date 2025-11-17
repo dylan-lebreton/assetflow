@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src.protocols.loader import Loader
+from assetflow.protocols.loader import Loader
 
 
 class FileLoader:

@@ -4,7 +4,7 @@ from typing import Any, Iterable
 
 import pytest
 
-from src.protocols.loader import Loader, LoaderFactory
+from assetflow.protocols.loader import Loader, LoaderFactory
 
 
 class FileLoader:

@@ -1,4 +1,4 @@
-# assetflow/src/assetflow/protocols/loader.py
+# assetflow/protocols/loader.py
 """
 Definition of Loader and LoaderFactory protocols.
 """
