@@ -96,6 +96,3 @@ def test_bad_factory_shape_note(tmp_path: Path) -> None:
 
     # Because DumperFactory is structural + runtime_checkable, this is True:
     assert isinstance(bad_factory, DumperFactory)
-
-    # And that's OK: your higher-level dispatcher (e.g., build_items_from_combinations)
-    # already checks that the factory's return value is actually a Dumper and raises otherwise.
