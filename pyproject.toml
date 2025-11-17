@@ -1,23 +1,28 @@
-[project]
+[tool.poetry]
 name = "assetflow"
 version = "0.1.0"
 description = "Assetflow is a minimalistic, asset-oriented workflow framework for Python."
 authors = [
-    {name = "Dylan Lebreton",email = "dylan.lebreton1996@gmail.com"}
+    "Dylan Lebreton <dylan.lebreton1996@gmail.com>",
 ]
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.12, <4.0"
-dependencies = [
+
+packages = [
+    { include = "assetflow", from = "src" },
 ]
 
+homepage = "https://github.com/dylan-lebreton/assetflow"
+repository = "https://github.com/dylan-lebreton/assetflow"
+keywords = ["workflow", "data", "assets", "pipeline"]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<4.0"
+
+[tool.poetry.group.dev.dependencies]
+treeproject = ">=0.1.0,<0.2.0"
+pytest = ">=9.0.1,<10.0.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[dependency-groups]
-dev = [
-    "treeproject (>=0.1.0,<0.2.0)",
-    "pytest (>=9.0.1,<10.0.0)"
-]
