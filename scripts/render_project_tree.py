@@ -28,7 +28,7 @@ res = build_tree_and_contents(
         ".pytest_cache",
         "*old",
     ],
-    content_include=[".py"],
+    content_include=[".py", ".toml"],
     content_ignore_file_type_error=False,
     encoding="utf-8"
 )
