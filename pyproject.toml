@@ -18,10 +18,16 @@ keywords = ["workflow", "data", "assets", "pipeline"]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<4.0"
+typeguard = "^4.4.4"
 
 [tool.poetry.group.dev.dependencies]
 treeproject = ">=0.1.0,<0.2.0"
 pytest = ">=9.0.1,<10.0.0"
+
+
+[tool.poetry.group.test.dependencies]
+polars = "^1.36.0"
+numpy = "^2.3.5"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
