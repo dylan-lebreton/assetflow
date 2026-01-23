@@ -1,6 +1,6 @@
 [project]
 name = "assetflow"
-version = "0.1.0"
+version = "0.1.1"
 description = "Assetflow is a minimalistic, asset-oriented workflow framework for Python."
 readme = "README.md"
 requires-python = ">=3.12"
