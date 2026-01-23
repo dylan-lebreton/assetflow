@@ -1,0 +1,35 @@
+[project]
+name = "assetflow"
+version = "0.1.0"
+description = "Assetflow is a minimalistic, asset-oriented workflow framework for Python."
+readme = "README.md"
+requires-python = ">=3.12"
+
+authors = [
+    { name = "Dylan LEBRETON", email = "dylan.lebreton1996@gmail.com" },
+]
+
+license = { text = "Apache-2.0" }
+license-files = ["LICEN[CS]E*"]
+
+dependencies = [
+    "treeproject>=0.1.0",
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development",
+]
+
+[project.urls]
+Homepage = "https://github.com/dylan-lebreton/assetflow"
+Repository = "https://github.com/dylan-lebreton/assetflow"
+
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"

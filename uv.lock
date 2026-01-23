@@ -1,0 +1,45 @@
+version = 1
+revision = 3
+requires-python = ">=3.12"
+
+[[package]]
+name = "anytree"
+version = "2.13.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bc/a8/eb55fab589c56f9b6be2b3fd6997aa04bb6f3da93b01154ce6fc8e799db2/anytree-2.13.0.tar.gz", hash = "sha256:c9d3aa6825fdd06af7ebb05b4ef291d2db63e62bb1f9b7d9b71354be9d362714", size = 48389, upload-time = "2025-04-08T21:06:30.662Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7b/98/f6aa7fe0783e42be3093d8ef1b0ecdc22c34c0d69640dfb37f56925cb141/anytree-2.13.0-py3-none-any.whl", hash = "sha256:4cbcf10df36b1f1cba131b7e487ff3edafc9d6e932a3c70071b5b768bab901ff", size = 45077, upload-time = "2025-04-08T21:06:29.494Z" },
+]
+
+[[package]]
+name = "assetflow"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "treeproject" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "treeproject", specifier = ">=0.1.0" }]
+
+[[package]]
+name = "pathspec"
+version = "0.12.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ca/bc/f35b8446f4531a7cb215605d100cd88b7ac6f44ab3fc94870c120ab3adbf/pathspec-0.12.1.tar.gz", hash = "sha256:a482d51503a1ab33b1c67a6c3813a26953dbdc71c31dacaef9a838c4e29f5712", size = 51043, upload-time = "2023-12-10T22:30:45Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cc/20/ff623b09d963f88bfde16306a54e12ee5ea43e9b597108672ff3a408aad6/pathspec-0.12.1-py3-none-any.whl", hash = "sha256:a0d503e138a4c123b27490a4f7beda6a01c6f288df0e4a8b79c7eb0dc7b4cc08", size = 31191, upload-time = "2023-12-10T22:30:43.14Z" },
+]
+
+[[package]]
+name = "treeproject"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anytree" },
+    { name = "pathspec" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d9/0a/7087f73869a906b2aaf2d59c7561aa0066c7176295dee2c48ea252c0a093/treeproject-0.1.0.tar.gz", hash = "sha256:388b6da899164c09edc623616a5e4dab32092b630c839cfeb5aa3416faac26ce", size = 7079, upload-time = "2025-11-13T01:14:02.216Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/28/0e/916251937dd9535af82290e9bcbb53299b97ecf3a9380afbad1c86591e62/treeproject-0.1.0-py3-none-any.whl", hash = "sha256:3ff96eba1d795cc45724da4fc4219309d6664111000ae22f8b7e969c716435eb", size = 9720, upload-time = "2025-11-13T01:14:00.803Z" },
+]
