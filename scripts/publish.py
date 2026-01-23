@@ -1,24 +1,14 @@
 #!/usr/bin/env python3
 """
-Build & publish this package to TestPyPI or PyPI using uv + build + twine.
+Two-command publish script (uv-friendly).
 
-Usage:
-  uv run scripts/publish.py --test
-  uv run scripts/publish.py --test --install-check
-  uv run scripts/publish.py --pypi
+Commands to remember:
+  uv run scripts/publish.py         -> publish to PyPI
+  uv run scripts/publish.py --test  -> publish to TestPyPI + install-check
 
-Environment (recommended via a local .env file, NOT committed):
-  Option 1 (simplest): only token
-    PYPI_TOKEN=pypi-xxxxxxxxxxxxxxxxxxxxxxxx
-
-  Option 2 (classic twine):
-    TWINE_USERNAME=__token__
-    TWINE_PASSWORD=pypi-xxxxxxxxxxxxxxxxxxxxxxxx
-
-Notes:
-- PyPI is immutable per version: once uploaded, you can't re-upload the same version.
-- This script refuses to publish if git repo is dirty or branch isn't main/master
-  (unless --skip-git-checks).
+Expected .env at repo root (NOT committed):
+  PYPI_TOKEN=pypi-...
+  TESTPYPI_TOKEN=pypi-...
 """
 
 from __future__ import annotations
@@ -35,8 +25,16 @@ DIST = ROOT / "dist"
 
 
 def run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess:
+    """Run a command from repo root, echoing stdout/stderr (useful for twine)."""
     print(f"\n$ {' '.join(cmd)}")
-    return subprocess.run(cmd, cwd=ROOT, check=check)
+    proc = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True)
+    if proc.stdout:
+        print(proc.stdout, end="" if proc.stdout.endswith("\n") else "\n")
+    if proc.stderr:
+        print(proc.stderr, end="" if proc.stderr.endswith("\n") else "\n")
+    if check and proc.returncode != 0:
+        raise subprocess.CalledProcessError(proc.returncode, cmd)
+    return proc
 
 
 def capture(cmd: list[str]) -> str:
@@ -47,7 +45,6 @@ def load_dotenv(dotenv_path: Path) -> None:
     """Tiny .env loader (no external deps)."""
     if not dotenv_path.exists():
         return
-
     for raw in dotenv_path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or "=" not in line:
@@ -59,29 +56,30 @@ def load_dotenv(dotenv_path: Path) -> None:
         os.environ.setdefault(key, value)
 
 
-def ensure_twine_env() -> None:
+def setup_twine_auth(target: str) -> None:
     """
-    Accept either:
-      - PYPI_TOKEN (preferred)
-      - or TWINE_USERNAME/TWINE_PASSWORD
+    Map the correct token into Twine's expected env vars.
+    - PyPI uses PYPI_TOKEN
+    - TestPyPI uses TESTPYPI_TOKEN
     """
-    token = os.environ.get("PYPI_TOKEN") or os.environ.get("PYPI_API_TOKEN")
-    if token:
-        os.environ.setdefault("TWINE_USERNAME", "__token__")
-        os.environ.setdefault("TWINE_PASSWORD", token)
+    if target == "pypi":
+        token = os.environ.get("PYPI_TOKEN") or os.environ.get("PYPI_API_TOKEN")
+        var_name = "PYPI_TOKEN"
+    else:
+        token = os.environ.get("TESTPYPI_TOKEN") or os.environ.get("TEST_PYPI_TOKEN")
+        var_name = "TESTPYPI_TOKEN"
 
-    user = os.environ.get("TWINE_USERNAME")
-    pwd = os.environ.get("TWINE_PASSWORD")
-    if not user or not pwd:
+    if not token:
         raise SystemExit(
-            "Missing credentials.\n"
-            "Provide either:\n"
-            "  PYPI_TOKEN=pypi-...   (recommended)\n"
-            "or:\n"
-            "  TWINE_USERNAME=__token__\n"
-            "  TWINE_PASSWORD=pypi-...\n"
-            "\nTip: put it in a local .env (and add .env to .gitignore)."
+            f"Missing {var_name}.\n"
+            "Your .env should contain:\n"
+            "  PYPI_TOKEN=pypi-...\n"
+            "  TESTPYPI_TOKEN=pypi-...\n"
         )
+
+    # Twine token auth convention:
+    os.environ["TWINE_USERNAME"] = "__token__"
+    os.environ["TWINE_PASSWORD"] = token
 
 
 def git_checks(skip: bool) -> None:
@@ -112,7 +110,7 @@ def git_checks(skip: bool) -> None:
 
 
 def ensure_tools() -> None:
-    # In a uv venv, this installs build+twine into the environment.
+    # Install build+twine into the uv-managed venv.
     run([sys.executable, "-m", "pip", "install", "-U", "build", "twine"])
 
 
@@ -130,16 +128,16 @@ def twine_check() -> None:
     run(["twine", "check", "dist/*"])
 
 
-def upload(repository: str) -> None:
-    # repository: "pypi" or "testpypi"
+def upload(target: str) -> None:
+    # target: "pypi" or "testpypi"
     args = ["twine", "upload"]
-    if repository == "testpypi":
+    if target == "testpypi":
         args += ["--repository", "testpypi"]
     args += ["dist/*"]
     run(args)
 
 
-def install_check_testpypi(package_name: str) -> None:
+def install_check_from_testpypi(package_name: str) -> None:
     # Sanity install from TestPyPI, but allow deps from PyPI via extra-index-url.
     run(
         [
@@ -158,70 +156,54 @@ def install_check_testpypi(package_name: str) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Build & publish the package to (Test)PyPI.")
-    target = p.add_mutually_exclusive_group(required=True)
-    target.add_argument("--test", action="store_true", help="Upload to TestPyPI")
-    target.add_argument("--pypi", action="store_true", help="Upload to PyPI")
+    p = argparse.ArgumentParser(
+        description="Publish to PyPI by default, or to TestPyPI with --test."
+    )
+    p.add_argument(
+        "--test",
+        action="store_true",
+        help="Publish to TestPyPI (and run install-check automatically).",
+    )
 
-    p.add_argument(
-        "--skip-git-checks",
-        action="store_true",
-        help="Skip branch/clean working tree checks",
-    )
-    p.add_argument(
-        "--no-build",
-        action="store_true",
-        help="Skip building (assumes dist/ already contains fresh artifacts)",
-    )
-    p.add_argument(
-        "--no-clean",
-        action="store_true",
-        help="Do not delete dist/ before building",
-    )
-    p.add_argument(
-        "--install-check",
-        action="store_true",
-        help="After uploading to TestPyPI, try installing the package from TestPyPI",
-    )
-    p.add_argument(
-        "--package-name",
-        default="assetflow",
-        help="Package name to install-check (default: assetflow)",
-    )
-    p.add_argument(
-        "--dotenv",
-        default=".env",
-        help="Path to a .env file (default: .env at repo root)",
-    )
+    # Keep a few practical knobs (optional)
+    p.add_argument("--skip-git-checks", action="store_true", help="Skip git safety checks")
+    p.add_argument("--no-build", action="store_true", help="Skip build step (assumes dist/ is fresh)")
+    p.add_argument("--no-clean", action="store_true", help="Do not delete dist/ before build")
+    p.add_argument("--package-name", default="assetflow", help="Package name for TestPyPI install-check")
+    p.add_argument("--dotenv", default=".env", help="Path to .env file (default: .env at repo root)")
     return p.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    target = "testpypi" if args.test else "pypi"
 
-    # Load .env first (if present)
-    dotenv_path = (ROOT / args.dotenv).resolve()
-    load_dotenv(dotenv_path)
+    # Load .env first
+    load_dotenv((ROOT / args.dotenv).resolve())
 
-    # Map PYPI_TOKEN -> TWINE_USERNAME/TWINE_PASSWORD
-    ensure_twine_env()
+    # Configure Twine auth depending on target
+    setup_twine_auth(target)
 
+    # Safety + tools
     git_checks(skip=args.skip_git_checks)
     ensure_tools()
 
+    # Build
     if not args.no_build:
         if not args.no_clean:
             clean_dist()
         build()
 
+    # Check + upload
     twine_check()
 
-    if args.test:
+    if target == "testpypi":
         print("\n[info] Uploading to TestPyPI…")
         upload("testpypi")
-        if args.install_check:
-            print("\n[info] Install-check from TestPyPI…")
-            install_check_testpypi(args.package_name)
+
+        # Always do install-check for --test (no extra flag)
+        print("\n[info] Install-check from TestPyPI…")
+        install_check_from_testpypi(args.package_name)
     else:
         print("\n[info] Uploading to PyPI…")
         upload("pypi")
